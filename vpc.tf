@@ -1,101 +1,84 @@
-# Create a VPC to launch our instances into
-resource "aws_vpc" "dev_vpc" {
-  cidr_block = "10.0.0.0/16"  
-  enable_dns_hostnames = true 
-  enable_dns_support = true
-  
-  tags       =  {
-    Name     = "deham14_VPC"
-  }       
-}
-resource "aws_subnet" "public-1" {
-  vpc_id     = aws_vpc.dev_vpc.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "us-west-2a"
-  map_public_ip_on_launch = true
-
+# Create VPC
+resource "aws_vpc" "vpc" {
+  cidr_block           = "10.0.0.0/24"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = {
-    Name = "deham14_publicsub1"
+    Name = "vpc ${var.tagNameDate}"
   }
 }
 
-
-resource "aws_subnet" "private-1" {
-  vpc_id     = aws_vpc.dev_vpc.id 
-  cidr_block = "10.0.2.0/24"
-  availability_zone = "us-west-2a"
-
-  tags = {
-    Name = "deham14_privatesub1" 
-  }
-}
-
-resource "aws_subnet" "public-2" {
-  vpc_id     = aws_vpc.dev_vpc.id
-  cidr_block = "10.0.3.0/24"
-  availability_zone = "us-west-2b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "deham14_publicsub2"
-  }
-}
-
-resource "aws_subnet" "private-2" {
-  vpc_id     = aws_vpc.dev_vpc.id 
-  cidr_block = "10.0.4.0/24"
-  availability_zone = "us-west-2b"
-
-  tags = {
-    Name = "deham14_privatesub2" 
-  }
-}
-
-# Create an Internet Gateway
+# Create Internet Gateway
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.dev_vpc.id
+  vpc_id = aws_vpc.vpc.id
+
   tags = {
-    Name = "deham14_IGW"
+    Name = "igw ${var.tagNameDate}"
   }
 }
-resource "aws_route_table" "RB_Public_RouteTable" {
-  vpc_id = aws_vpc.dev_vpc.id
+
+# Create Public Subnets
+resource "aws_subnet" "public" {
+  count                   = length(var.public_subnet_cidr_blocks)
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.public_subnet_cidr_blocks[count.index]
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "Public_Subnet ${var.tagNameDate}_${count.index + 1}"
+  }
+
+}
+
+# Create Public Route Tables
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.vpc.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.cidr_blocks[0]
     gateway_id = aws_internet_gateway.igw.id
   }
+
   tags = {
-    Name = "deham14_publicRT"
+    Name = "Public_Route_Table ${var.tagNameDate}"
   }
 }
 
-resource "aws_route_table" "RB_Private_RouteTable" {
-  vpc_id = aws_vpc.dev_vpc.id
+# Associate Public Subnets with Public Route Table
+resource "aws_route_table_association" "public_assoc" {
+  count          = length(var.public_subnet_cidr_blocks)
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public.id
+}
+
+
+# Create Private Subnets
+resource "aws_subnet" "private" {
+  count             = length(var.private_subnet_cidr_blocks)
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = var.private_subnet_cidr_blocks[count.index]
+  availability_zone = var.availability_zones[count.index]
+
   tags = {
-    Name = "deham14_privateRT"
+    Name = "Private_Subnet ${var.tagNameDate}_${count.index + 1}"
   }
 }
-resource "aws_route_table_association" "Public_Subnet1_Asso" {
-  route_table_id = aws_route_table.RB_Public_RouteTable.id
-  subnet_id      = aws_subnet.public-1.id
-  depends_on     = [aws_route_table.RB_Public_RouteTable, aws_subnet.public-1]
+
+# Create Private Route Tables
+
+resource "aws_route_table" "private" {
+  #count  = length(var.availability_zones)
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "Private_Route_Table ${var.tagNameDate}"
+  }
 }
 
-resource "aws_route_table_association" "Private_Subnet1_Asso" {
-  route_table_id = aws_route_table.RB_Private_RouteTable.id
-  subnet_id      = aws_subnet.private-1.id
-  depends_on     = [aws_route_table.RB_Private_RouteTable, aws_subnet.private-1]
-}
-
-resource "aws_route_table_association" "Public_Subnet2_Asso" {
-  route_table_id = aws_route_table.RB_Public_RouteTable.id
-  subnet_id      = aws_subnet.public-2.id
-  depends_on     = [aws_route_table.RB_Public_RouteTable, aws_subnet.public-2]
-}
-
-resource "aws_route_table_association" "Private_Subnet2_Asso" {
-  route_table_id = aws_route_table.RB_Private_RouteTable.id
-  subnet_id      = aws_subnet.private-2.id
-  depends_on     = [aws_route_table.RB_Private_RouteTable, aws_subnet.private-2]
+# Associate Private Subnets with Private Route Tables
+resource "aws_route_table_association" "private_assoc" {
+  count          = length(var.private_subnet_cidr_blocks)
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private.id
 }
