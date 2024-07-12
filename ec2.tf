@@ -1,54 +1,43 @@
 locals {
-  # The name of the EC2 instance
-  name = "awsrestartproject"
-  owner = "Saji"
+  name = "WordPress Instance ${var.tagNameDate}"
 }
-
-### Select the newest AMI
-
-data "aws_ami" "latest_linux_ami" {
+#Get latest ami ID of Amazon Linux2 - values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
 
   filter {
     name   = "name"
-    values = ["al2023-ami-2023*x86_64"]
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 }
 
-### Create an EC2 instance
-
-resource "aws_instance" "instance" {
-  ami                         = data.aws_ami.latest_linux_ami.id
-  
-  instance_type               = "t2.micro"
-  availability_zone           = "us-west-2a"
+resource "aws_instance" "wordpress_instance" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.ec2_instance_type
+  availability_zone           = var.availability_zones[0]
+  key_name                    = var.key_name
   associate_public_ip_address = true
-  key_name                    = "vockey"
-  #vpc_security_group_ids      = [aws_security_group.sg_vpc.id]
-  subnet_id                   = aws_subnet.public-1.id
-  #iam_instance_profile        = "deham14_ec2"
-  count = 1
+  vpc_security_group_ids      = [aws_security_group.wordpress_sg.id]
+  subnet_id                   = aws_subnet.public[0].id # Choose one of the public subnets
+
+
   tags = {
-    Name = "Deham14"
+    Name = local.name
   }
-  #user_data = file("userdata.sh")
-  #user_data = "${base64encode(data.template_file.ec2userdatatemplate.rendered)}"
-
-  provisioner "local-exec" {
-    command = "echo Instance Type = ${self.instance_type}, Instance ID = ${self.id}, Public IP = ${self.public_ip}, AMI ID = ${self.ami} >> metadata"
-  }
-} 
+  user_data = file("UserDataEC2.sh")
+#   user_data = data.template_file.userdataEC.rendered
 
 
-#data "template_file" "ec2userdatatemplate" {
-  #template = "${file("userdata.tpl")}"
-#}
+# }
 
-#output "ec2rendered" {
-  #value = "${data.template_file.ec2userdatatemplate.rendered}"
-#}
+# data "template_file" "userdataEC" {
+#   template = file("UserDataEC2.sh")
 
-output "public_ip" {
-  value = aws_instance.instance[0].public_ip
-} 
+#   vars = {
+#     rds_endpoint = replace("${data.aws_db_instance.mysql_data.endpoint}", ":3306", "")
+#     rds_username = "${var.rds_username}"
+#     rds_password = "${var.rds_password}"
+#     rds_db_name  = "${data.aws_db_instance.mysql_data.db_name}"
+#   }
+ } 
