@@ -4,7 +4,14 @@ resource "aws_lb" "wpresume_alb" {
   load_balancer_type = "application"
   subnets            = [aws_subnet.public[0].id, aws_subnet.public[1].id]  # Replace with your subnet IDs
   security_groups    = [aws_security_group.wordpress_sg.id] # Replace with your security group ID
+
+# add tag for alb
+
+tags = {
+    Name = "wpresume_alb ${var.tagNameDate}"
+  }
 }
+
 
 # Create the target group
 resource "aws_lb_target_group" "wpresume_target_group" {
@@ -14,12 +21,14 @@ resource "aws_lb_target_group" "wpresume_target_group" {
   vpc_id      = aws_vpc.vpc.id # Replace with your VPC ID
   target_type = "instance"
 
-  health_check {
-    path                = "/"
-    healthy_threshold   = 2
-    unhealthy_threshold = 10
+# add tag for target group
+  tags = {
+    Name = "wpresume-target-group ${var.tagNameDate}"
   }
 }
+
+  
+
 
 # Create the listener
 resource "aws_lb_listener" "wpresume_listener" {
