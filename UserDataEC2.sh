@@ -5,6 +5,7 @@ sudo yum update -y
 # Configure AWS CLI with IAM role credentials
 aws configure set default.region us-west-2
 
+
 sudo yum install -y stress-ng
 
 #Install httpd
@@ -39,6 +40,7 @@ DBName="dbresume90"
 DBUser="dbuser90"
 DBPassword="qwerty123"
 RDS_ENDPOINT="localhost"
+Documentroot="/var/www/html"
 
 # Create a temporary file to store the database value
 # sudo touch db.txt
@@ -58,9 +60,9 @@ sudo mysql -u root --password=$DBRootPassword < /tmp/db.setup
 sudo rm /tmp/db.setup
 
 sudo yum install -y wget
-sudo wget http://wordpress.org/latest.tar.gz -P /var/www/html/
+sudo wget http://wordpress.org/latest.tar.gz -P $Documentroot
 
-cd /var/www/html
+cd $Documentroot
 sudo tar -zxvf latest.tar.gz
 sudo cp -rvf wordpress/* .
 
@@ -75,6 +77,7 @@ sudo sed -i "s/'database_name_here'/'$DBName'/g" wp-config.php
 sudo sed -i "s/'username_here'/'$DBUser'/g" wp-config.php
 sudo sed -i "s/'password_here'/'$DBPassword'/g" wp-config.php
 sudo sed -i "s/'localhost'/'$RDS_ENDPOINT'/g" wp-config.php
+sudo echo "define('FS_METHOD', 'direct');" >> /var/www/html/wp-config.php
 
 #Grant permissions
 
@@ -94,3 +97,4 @@ sudo yum install -y php-cli php-pdo php-fpm php-json php-mysqlnd
 # Restart Apache
 sudo systemctl restart httpd
 sudo systemctl start mariadb
+
