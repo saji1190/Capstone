@@ -32,3 +32,27 @@ variable "key_name" {
   description = "Name of the EC2 key pair"
   default     = "vockey"
 }
+
+# UserData Variables
+
+variable "access_key" {
+  default = "<Specify the access key>"
+  }
+
+variable "secret_key" {
+  default = "<Specify the secret key>"
+  }
+
+variable "session_token" {
+  default = "<Specify the session tocken>"
+  }
+
+variable "region" {
+  default     = "us-west-2"
+}
+
+# S3 Bucket Variables
+
+variable "S3_BUCKET" {
+  default     = "saji-worpress24"
+}
