@@ -25,14 +25,24 @@ resource "aws_instance" "wordpress_instance" {
   tags = {
     Name = local.name
   }
-  user_data = file("UserDataEC2.sh")
-#   user_data = data.template_file.userdataEC.rendered
+  
+ #user_data = file("UserDataEC2.sh")
+ #user_data = data.template_file.userdataEC.rendered
+ user_data = base64encode(templatefile("${path.module}/UserDataEC2.sh", {
+    access_key    = var.access_key
+    secret_key    = var.secret_key
+    session_token = var.session_token
+    region        = var.region
+    bucket_name   = var.S3_BUCKET
+
+    
+  }))
 
 
-# }
+}
 
-# data "template_file" "userdataEC" {
-#   template = file("UserDataEC2.sh")
+ #data "template_file" "userdataEC" {
+  #template = file("UserDataEC2.sh")
 
 #   vars = {
 #     rds_endpoint = replace("${data.aws_db_instance.mysql_data.endpoint}", ":3306", "")
@@ -40,4 +50,4 @@ resource "aws_instance" "wordpress_instance" {
 #     rds_password = "${var.rds_password}"
 #     rds_db_name  = "${data.aws_db_instance.mysql_data.db_name}"
 #   }
- } 
+ #} 
