@@ -37,20 +37,26 @@ sudo systemctl restart httpd
 DBRootPassword='rootpassword'
 mysqladmin -u root password $DBRootPassword
 
+# # Retrieve RDS endpoint from Terraform output
+# DBName="dbresume90"
+# DBUser="dbuser90"
+# DBPassword="qwerty123"
+# RDS_ENDPOINT="localhost"
+# Documentroot="/var/www/html"
+
 # Retrieve RDS endpoint from Terraform output
-DBName="dbresume90"
-DBUser="dbuser90"
-DBPassword="qwerty123"
-RDS_ENDPOINT="localhost"
-Documentroot="/var/www/html"
+DBName=${rds_db_name}
+DBUser=${rds_username}
+DBPassword=${rds_password}
+RDS_ENDPOINT=${rds_endpoint}
 
 # Create a temporary file to store the database value
-# sudo touch db.txt
-# sudo chmod 777 db.txt
-# sudo echo "DATABASE $DBName;" >> db.txt
-# sudo echo "USER $DBUser;" >> db.txt
-# sudo echo "PASSWORD $DBPassword;" >> db.txt
-# sudo echo "HOST $RDS_ENDPOINT;" >> db.txt
+sudo touch db.txt
+sudo chmod 777 db.txt
+sudo echo "DATABASE $DBName;" >> db.txt
+sudo echo "USER $DBUser;" >> db.txt
+sudo echo "PASSWORD $DBPassword;" >> db.txt
+sudo echo "HOST $RDS_ENDPOINT;" >> db.txt
 
 #Create Wordpress database
 
