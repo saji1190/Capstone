@@ -34,20 +34,25 @@ resource "aws_instance" "wordpress_instance" {
     session_token = var.session_token
     region        = var.region
     bucket_name   = var.S3_BUCKET
-
     
-  }))
+    rds_endpoint = replace(aws_db_instance.rds-db.endpoint, ":3306", "")
+    rds_username = var.rds_db_username
+    rds_password = var.rds_db_password
+    rds_db_name  = var.rds_db_name
+    
+    
+    }))
 
 
-}
+ }
 
- #data "template_file" "userdataEC" {
-  #template = file("UserDataEC2.sh")
+#  data "template_file" "userdataEC" {
+#   template = file("UserDataEC2.sh")
 
 #   vars = {
-#     rds_endpoint = replace("${data.aws_db_instance.mysql_data.endpoint}", ":3306", "")
-#     rds_username = "${var.rds_username}"
-#     rds_password = "${var.rds_password}"
-#     rds_db_name  = "${data.aws_db_instance.mysql_data.db_name}"
+#     rds_endpoint = replace("${data.aws_db_instance.rds.endpoint}", ":3306", "")
+#     rds_username = "${var.rds_db_username}"
+#     rds_password = "${var.rds_db_password}"
+#     rds_db_name  = "${var.rds_db_name}"
 #   }
- #} 
+#  } 
