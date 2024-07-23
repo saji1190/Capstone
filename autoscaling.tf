@@ -65,7 +65,18 @@ resource "aws_launch_template" "scaling_launch_template" {
   }
 }
 
-
+# Create an Auto Scaling policy for scaling up and down based on CPU usage
+resource "aws_autoscaling_policy" "wpresume" {
+  name                   = "wpresume-autoscaling-policy"
+  policy_type            = "TargetTrackingScaling"
+  autoscaling_group_name = aws_autoscaling_group.wpresume.name
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 80.0
+  }
+}
 
 
 
