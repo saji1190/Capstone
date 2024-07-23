@@ -36,15 +36,15 @@ variable "key_name" {
 # UserData Variables
 
 variable "access_key" {
-  default = "<Specify the access key>"
+  default = "access_key"
   }
 
 variable "secret_key" {
-  default = "<Specify the secret key>"
+  default = "sceret_key"
   }
 
 variable "session_token" {
-  default = "<Specify the session tocken>"
+  default = "<sessio_token>"
   }
 
 variable "region" {
@@ -56,3 +56,19 @@ variable "region" {
 variable "S3_BUCKET" {
   default     = "saji-worpress24"
 }
+
+# Variables for RDS DB Instance
+variable "rds_db_username" {
+  description = "Username for the RDS instance"
+  default = "DBUsername" # Replace with your RDS username
+}
+variable "rds_db_password" {
+  description = "Password for the RDS instance"
+  default = "DBpassword" # Replace with your RDS User password
+  sensitive = true
+}
+variable "rds_db_name" {
+  description = "Name of the RDS DB instance"
+  default = "DBname" # Replace with your desired RDS DB name
+}
+  
