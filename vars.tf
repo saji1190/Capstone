@@ -54,7 +54,7 @@ variable "region" {
 # S3 Bucket Variables
 
 variable "S3_BUCKET" {
-  default     = "saji-worpress24"
+  default     = "<Specify bucket name>"
 }
 
 # Variables for RDS DB Instance
